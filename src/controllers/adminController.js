@@ -263,3 +263,29 @@ export const getVerificationLogs = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+// @desc    Delete a user
+// @route   DELETE /api/admin/users/:id
+// @access  Private (Admin only)
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prevent admin from deleting themselves or other admins
+        if (user.role === 'admin') {
+            return res.status(400).json({ message: 'Cannot delete admin accounts' });
+        }
+
+        // Delete the user
+        await User.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
