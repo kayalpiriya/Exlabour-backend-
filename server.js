@@ -9,7 +9,6 @@ import authRoutes from './src/routes/authRoutes.js';
 import taskRoutes from './src/routes/taskRoutes.js';
 import bidRoutes from './src/routes/bidRoutes.js';
 import adminRoutes from './src/routes/adminRoutes.js';
-import notificationRoutes from './src/routes/notificationRoutes.js';
 
 // Load env vars
 dotenv.config();
@@ -47,7 +46,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/bids', bidRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/notifications', notificationRoutes);
 
 
 // Base route
