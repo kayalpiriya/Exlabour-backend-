@@ -20,12 +20,21 @@ const app = express();
 
 // Middleware
 // app.use(cors());
+// app.use(cors({
+//   origin: [
+//     "http://localhost:3000",
+//     "https://exlabour-frontend.vercel.app"
+//   ],
+//   credentials: true
+// }));
+
 app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://exlabour-frontend.vercel.app"
   ],
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
 
