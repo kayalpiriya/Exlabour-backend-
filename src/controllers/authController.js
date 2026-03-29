@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { broadcastNotification } from '../utils/notificationHelper.js';
 
 // Generate JWT
 const generateToken = (id) => {
@@ -39,6 +40,22 @@ export const registerUser = async (req, res) => {
             role,
             phone
         });
+
+        // Notify admins about new registration
+        try {
+            const admins = await User.find({ role: 'admin' }).select('_id');
+            const adminIds = admins.map(a => a._id);
+            await broadcastNotification({
+                userIds: adminIds,
+                title: 'New User Registration',
+                message: `A new ${role} (${name}) has registered and is pending verification.`,
+                type: 'registration',
+                relatedId: user._id,
+                room: 'admin'
+            });
+        } catch (notifErr) {
+            console.error('Notification error on registration:', notifErr.message);
+        }
 
         res.status(201).json({
             _id: user._id,

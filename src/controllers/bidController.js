@@ -237,6 +237,7 @@
 
 import Bid from '../models/Bid.js';
 import Task from '../models/Task.js';
+import { sendNotification } from '../utils/notificationHelper.js';
 
 // ==================== Tasker APIs ====================
 
@@ -278,6 +279,19 @@ export const placeBid = async (req, res) => {
             deliveryDays,
             proposalMessage
         });
+
+        // Notify the task owner about the new bid
+        try {
+            await sendNotification({
+                userId: task.userId,
+                title: 'New Bid Received',
+                message: `You received a new bid of $${bidAmount} from ${req.user.name} for your task.`,
+                type: 'bidding',
+                relatedId: task._id
+            });
+        } catch (notifErr) {
+            console.error('Notification error on bidding:', notifErr.message);
+        }
 
         res.status(201).json(bid);
     } catch (error) {
@@ -427,6 +441,19 @@ export const acceptBid = async (req, res) => {
         task.taskStatus = 'assigned';
         task.assignedTaskerId = bid.taskerId;
         await task.save();
+
+        // Notify the tasker that their bid was accepted
+        try {
+            await sendNotification({
+                userId: bid.taskerId,
+                title: 'Bid Accepted!',
+                message: `Your bid for the task "${task.title}" has been accepted!`,
+                type: 'bid_acceptance',
+                relatedId: task._id
+            });
+        } catch (notifErr) {
+            console.error('Notification error on bid acceptance:', notifErr.message);
+        }
 
         res.status(200).json({
             message: 'Bid accepted and task assigned successfully',

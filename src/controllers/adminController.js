@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Task from '../models/Task.js';
 import Bid from '../models/Bid.js';
 import VerificationLog from '../models/VerificationLog.js';
+import { sendNotification, broadcastNotification } from '../utils/notificationHelper.js';
 
 // @desc    Get admin dashboard summary
 // @route   GET /api/admin/dashboard
@@ -89,6 +90,19 @@ export const verifyUser = async (req, res) => {
             remarks: remarks || ''
         });
 
+        // Notify User/Tasker about verification decision
+        try {
+            await sendNotification({
+                userId: user._id,
+                title: 'Account Verification Update',
+                message: `Your account status has been updated to ${decision}.`,
+                type: 'verification',
+                relatedId: user._id
+            });
+        } catch (notifErr) {
+            console.error('Notification error on verification:', notifErr.message);
+        }
+
         res.status(200).json({
             message: `User ${decision} successfully`,
             user: {
@@ -155,6 +169,34 @@ export const approveTask = async (req, res) => {
             decision,
             remarks: remarks || ''
         });
+
+        try {
+            // Notify task owner
+            await sendNotification({
+                userId: task.userId,
+                title: 'Task Approval Update',
+                message: `Your task "${task.title}" has been ${decision}.`,
+                type: 'task_approval',
+                relatedId: task._id
+            });
+
+            // If approved, notify verified taskers
+            if (decision === 'approved') {
+                const verifiedTaskers = await User.find({ role: 'tasker', verificationStatus: 'verified' }).select('_id');
+                const taskerIds = verifiedTaskers.map(t => t._id);
+                
+                await broadcastNotification({
+                    userIds: taskerIds,
+                    title: 'New Task Available',
+                    message: `A new task "${task.title}" has been posted in your area of expertise.`,
+                    type: 'task_creation',
+                    relatedId: task._id,
+                    room: 'verified_taskers'
+                });
+            }
+        } catch (notifErr) {
+            console.error('Notification error on task approval:', notifErr.message);
+        }
 
         res.status(200).json({
             message: `Task ${decision} successfully`,

@@ -1,4 +1,6 @@
 import Task from '../models/Task.js';
+import User from '../models/User.js';
+import { broadcastNotification } from '../utils/notificationHelper.js';
 
 // @desc    Create a new task
 // @route   POST /api/tasks
@@ -40,6 +42,22 @@ console.log('SAVED ATTACHMENTS:', attachments);
             location,
             attachments
         });
+
+        // Notify admins about new task requiring approval
+        try {
+            const admins = await User.find({ role: 'admin' }).select('_id');
+            const adminIds = admins.map(a => a._id);
+            await broadcastNotification({
+                userIds: adminIds,
+                title: 'New Task Pending Approval',
+                message: `User ${req.user.name} created a new task "${title}" that requires approval.`,
+                type: 'task_creation',
+                relatedId: task._id,
+                room: 'admin'
+            });
+        } catch (notifErr) {
+            console.error('Notification error on task creation:', notifErr.message);
+        }
 
         res.status(201).json(task);
     } catch (error) {
