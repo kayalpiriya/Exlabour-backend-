@@ -25,11 +25,11 @@ export const createTask = async (req, res) => {
 
         // const attachments = req.files ? req.files.map(file => file.path) : [];
         const attachments = Array.isArray(req.files)
-    ? req.files.map(file => file.path || file.secure_url || '')
-    : [];
+            ? req.files.map(file => file.path || file.secure_url || '')
+            : [];
 
-console.log('UPLOADED FILES:', req.files);
-console.log('SAVED ATTACHMENTS:', attachments);
+        console.log('UPLOADED FILES:', req.files);
+        console.log('SAVED ATTACHMENTS:', attachments);
 
         const task = await Task.create({
             userId: req.user._id,
@@ -84,7 +84,7 @@ export const getTasks = async (req, res) => {
         }
 
 
-                console.log("🔍 MONGODB FILTER BEING APPLIED:", filter); // DEBUG 2
+        console.log("🔍 MONGODB FILTER BEING APPLIED:", filter); // DEBUG 2
 
 
         // Admin sees everything (no filter)
@@ -116,7 +116,7 @@ export const getTasks = async (req, res) => {
 
         res.status(200).json(tasks);
     } catch (error) {
-                console.error("🔥 Task Creation Error 🔥:", error); // Itha add pannunga
+        console.error("🔥 Task Creation Error 🔥:", error);
 
         res.status(500).json({ message: error.message });
     }
@@ -175,9 +175,9 @@ export const updateTask = async (req, res) => {
         //     task.attachments = [...task.attachments, ...newAttachments];
         // }
         if (req.files && req.files.length > 0) {
-    const newAttachments = req.files.map(file => file.path || file.secure_url || '');
-    task.attachments = [...task.attachments, ...newAttachments];
-}
+            const newAttachments = req.files.map(file => file.path || file.secure_url || '');
+            task.attachments = [...task.attachments, ...newAttachments];
+        }
 
         await task.save();
         res.status(200).json(task);

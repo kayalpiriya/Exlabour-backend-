@@ -24,15 +24,6 @@ const httpServer = createServer(app);
 initSocket(httpServer);
 
 // Middleware
-// app.use(cors());
-// app.use(cors({
-//   origin: [
-//     "http://localhost:3000",
-//     "https://exlabour-frontend.vercel.app"
-//   ],
-//   credentials: true
-// }));
-
 app.use(cors({
   origin: [
     "http://localhost:3000",
@@ -56,7 +47,7 @@ app.use('/api/notifications', notificationRoutes);
 
 // Base route
 app.get('/', (req, res) => {
-    res.send('ExLabour API is running...');
+  res.send('ExLabour API is running...');
 });
 
 // Error handler
@@ -65,5 +56,5 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT} with Socket.io`);
+  console.log(`Server running on port ${PORT} with Socket.io`);
 });

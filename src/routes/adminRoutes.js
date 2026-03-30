@@ -10,7 +10,7 @@ import {
     getAllBids,
     toggleBlockUser,
     getVerificationLogs,
-        deleteUser // <-- 1. IMPORTED NEW FUNCTION
+    deleteUser
 
 } from '../controllers/adminController.js';
 import { protect, authorize } from '../middlewares/auth.js';
